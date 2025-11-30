@@ -62,3 +62,4 @@ bun.lockb
 expo-env.d.ts
 # @end expo-cli
 /generated/prisma
+

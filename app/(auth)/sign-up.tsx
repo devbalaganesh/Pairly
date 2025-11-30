@@ -11,20 +11,30 @@ import images from "@/assets/constants/images";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React from "react";
 import { useSignUp } from "@clerk/clerk-expo";
+import { useAuth } from "@clerk/clerk-expo";
+import { useRouter } from "expo-router";
 import CountryPicker, { CountryCode } from "react-native-country-picker-modal";
 
 const Signup = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
 
-  // MODE: "phone" OR "email"
+  React.useEffect(() => {
+    if (isSignedIn) {
+      router.replace("/");
+    }
+  }, [isSignedIn]);
+
+
   const [mode, setMode] = React.useState<"phone" | "email">("phone");
 
-  // phone fields
+  // Phone fields
   const [countryCode, setCountryCode] = React.useState<CountryCode>("IN");
   const [callingCode, setCallingCode] = React.useState("91");
   const [phoneNumber, setPhoneNumber] = React.useState("");
 
-
+  
   const [emailAddress, setEmailAddress] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -32,7 +42,6 @@ const Signup = () => {
   const [pendingVerification, setPendingVerification] = React.useState(false);
   const [code, setCode] = React.useState("");
 
- 
   const tryPhoneSignup = async () => {
     if (!isLoaded || !signUp) return;
 
@@ -52,16 +61,16 @@ const Signup = () => {
       const errCode = err?.errors?.[0]?.code;
 
       if (errCode === "unsupported_country_code") {
-    
+     
         setMode("email");
         return;
       }
 
-      console.error("PHONE SIGNUP ERROR:", JSON.stringify(err, null, 2));
+      console.log("PHONE SIGNUP ERROR:", JSON.stringify(err, null, 2));
     }
   };
 
- 
+
   const tryEmailSignup = async () => {
     if (!isLoaded || !signUp) return;
 
@@ -77,16 +86,17 @@ const Signup = () => {
 
       setPendingVerification(true);
     } catch (err) {
-      console.error("EMAIL SIGNUP ERROR:", JSON.stringify(err, null, 2));
+      console.log("EMAIL SIGNUP ERROR:", JSON.stringify(err, null, 2));
     }
   };
+
 
   const onSignUpPress = () => {
     if (mode === "phone") tryPhoneSignup();
     else tryEmailSignup();
   };
 
-
+ 
   const onVerifyPress = async () => {
     if (!isLoaded || !signUp) return;
 
@@ -101,22 +111,21 @@ const Signup = () => {
 
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        router.replace("/");
       }
     } catch (err) {
-      console.error("VERIFY ERROR:", JSON.stringify(err, null, 2));
+      console.log("VERIFY ERROR:", JSON.stringify(err, null, 2));
     }
   };
 
- 
+
   if (pendingVerification) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center px-6 bg-slate-50">
         <View className="bg-white px-7 py-9 rounded-2xl w-full max-w-[400px]">
-          <Text className="font-JakartaExtraBold text-2xl mb-2">
-            Verification
-          </Text>
+          <Text className="text-2xl mb-2 font-bold">Verification</Text>
 
-          <Text className="font-Jakarta mb-5">
+          <Text className="mb-5">
             {mode === "phone"
               ? `We sent an SMS code to +${callingCode} ${phoneNumber}`
               : `We sent a code to ${emailAddress}`}
@@ -134,7 +143,7 @@ const Signup = () => {
             onPress={onVerifyPress}
             className="bg-primaryPurple px-6 py-3 rounded-xl mt-4"
           >
-            <Text className="text-white text-lg font-semibold text-center font-playfairBold">
+            <Text className="text-white text-lg text-center font-bold">
               Verify
             </Text>
           </TouchableOpacity>
@@ -143,7 +152,6 @@ const Signup = () => {
     );
   }
 
-
   return (
     <SafeAreaView className="flex-1 bg-slate-50">
       <KeyboardAvoidingView
@@ -151,9 +159,13 @@ const Signup = () => {
         className="flex-1"
       >
         <View className="flex-1 px-4 py-10">
-          <Image source={images.emailicon2} className="w-12 h-12 mb-4" />
+        <Image
+  source={mode === "email" ? images.emailicon2 : images.phone}
+  className="w-12 h-12 mb-4"
+/>
 
-          <Text className="font-playfairBold text-4xl mb-8">
+
+          <Text className="text-4xl mb-8 font-bold">
             {mode === "phone"
               ? "What's your phone number?"
               : "What's your email?"}
@@ -185,7 +197,7 @@ const Signup = () => {
             </View>
           )}
 
-       
+    
           {mode === "email" && (
             <>
               <TextInput
@@ -205,7 +217,7 @@ const Signup = () => {
             </>
           )}
 
-   
+      
           <TouchableOpacity
             onPress={() => setMode(mode === "phone" ? "email" : "phone")}
             className="mt-2"
@@ -213,16 +225,16 @@ const Signup = () => {
             <Text className="text-blue-600">
               {mode === "phone"
                 ? "Use email instead"
-                : "Use phone number instead"}
+                : "Use phone instead"}
             </Text>
           </TouchableOpacity>
 
-     
+        
           <TouchableOpacity
             onPress={onSignUpPress}
-            className="bg-primaryPurple px-6 py-3 rounded-xl active:opacity-80 mt-5"
+            className="bg-primaryPurple px-6 py-3 rounded-xl mt-5"
           >
-            <Text className="text-white text-lg font-semibold text-center font-playfairBold">
+            <Text className="text-white text-lg text-center font-bold">
               Continue
             </Text>
           </TouchableOpacity>

@@ -1,10 +1,15 @@
-import {View,Text} from 'react-native'
+import { View, Text } from "react-native";
+import { SignOutButton } from "./(auth)/SignOutButton";
 
-const HomeScreen=()=>{
-    return(
+const HomeScreen = () => {
+  return (
     <View>
-        <Text>hello</Text>
-    </View>
-)}
+      <Text>hello</Text>
 
-export default HomeScreen
+      {/* Render the signout button */}
+      <SignOutButton />
+    </View>
+  );
+};
+
+export default HomeScreen;
