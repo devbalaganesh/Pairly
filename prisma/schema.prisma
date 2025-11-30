@@ -1,0 +1,181 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+model User {
+  user_id        String   @id @db.Uuid
+  clerk_id       String   @unique
+  email          String   @unique
+  password_hash  String
+  is_premium     Boolean  @default(false)
+  is_paused      Boolean  @default(false)
+  last_active_at DateTime?
+  created_at     DateTime @default(now())
+
+  profile        UserProfile?
+  preferences    UserPreferences?
+
+  matchesA       Match[] @relation("UserA")
+  matchesB       Match[] @relation("UserB")
+
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  likesReceived  LikesReceived[]
+  likesGiven     LikesReceived[] @relation("LikesGiven")
+
+  @@map("users")
+}
+
+model UserProfile {
+  user_id          String   @id @db.Uuid
+  user             User     @relation(fields: [user_id], references: [user_id])
+  name             String?
+  birthdate        DateTime?
+  gender           String?
+  bio              String?
+  location         Bytes?
+  photos           Json?
+  prompts          Json?
+  preferences      Json?
+  inferred_persona Json?
+  updated_at       DateTime @default(now())
+
+  @@map("user_profiles")
+}
+
+
+model UserPreferences {
+  user_id               String   @id @db.Uuid
+  user                  User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  min_age               Int
+  max_age               Int
+  preferred_genders     String[] @db.VarChar(255)
+  dealbreaker_ethnicity Boolean @default(false)
+  dealbreaker_religion  Boolean @default(false)
+  max_distance_km       Int @default(50)
+
+  @@map("user_preferences")
+}
+
+
+model Message {
+  message_id  String   @id @db.Uuid
+  match_id    String?  @db.Uuid
+
+  sender_id   String   @db.Uuid     // FIXED
+  receiver_id String   @db.Uuid     // FIXED
+
+  body        String?
+  sent_at     DateTime @default(now())
+  is_seen     Boolean  @default(false)
+
+  sender   User @relation("SentMessages", fields: [sender_id], references: [user_id])
+  receiver User @relation("ReceivedMessages", fields: [receiver_id], references: [user_id])
+
+  @@map("messages")
+}
+
+
+model Match {
+  match_id        String   @id @db.Uuid
+
+  user_a          String   @db.Uuid   // FIXED
+  user_b          String   @db.Uuid   // FIXED
+
+  matched_at      DateTime @default(now())
+  last_message_at DateTime?
+
+  userA User @relation("UserA", fields: [user_a], references: [user_id])
+  userB User @relation("UserB", fields: [user_b], references: [user_id])
+
+  @@unique([user_a, user_b])
+  @@map("matches")
+}
+
+
+model Swipe {
+  user_pair    String
+  swiper       String @db.Uuid    // FIXED
+  swipee       String @db.Uuid    // FIXED
+  direction    String
+  swipe_time   DateTime @default(now())
+  is_processed Boolean  @default(false)
+
+  @@id([user_pair, swiper, swipee])
+  @@map("swipes")
+}
+
+
+model ProfileVisibility {
+  viewer_id     String @db.Uuid   // FIXED
+  viewed_id     String @db.Uuid   // FIXED
+  first_seen_at DateTime?
+  is_seen       Boolean @default(false)
+
+  @@id([viewer_id, viewed_id])
+  @@map("profile_visibility")
+}
+
+
+model LikesReceived {
+  user_id    String @db.Uuid      // FIXED
+  liker_id   String @db.Uuid      // FIXED
+  created_at DateTime @default(now())
+  status     String
+
+  user  User @relation(fields: [user_id], references: [user_id])
+  liker User @relation("LikesGiven", fields: [liker_id], references: [user_id])
+
+  @@id([user_id, liker_id])
+  @@map("likes_received")
+}
+
+
+
+model SwipeHistory {
+  user_pair  String
+  from_user  String @db.Uuid
+  to_user    String @db.Uuid
+  direction  String
+  swipe_time DateTime @default(now())
+
+  @@id([user_pair, from_user, to_user])
+  @@map("swipe_history")
+}
+
+
+model ChatIndex {
+  match_id     String @db.Uuid
+  user_id      String @db.Uuid
+  last_read_at DateTime?
+
+  @@id([match_id, user_id])
+  @@map("chat_index")
+}
+
+
+model SeenProfile {
+  viewer_id  String @db.Uuid
+  profile_id String @db.Uuid
+  seen_at    DateTime @default(now())
+
+  @@id([viewer_id, profile_id])
+  @@map("seen_profiles")
+}
+
+
+model UserFeedCache {
+  user_id      String @db.Uuid
+  profile_id   String @db.Uuid
+  rank         Float
+  generated_at DateTime @default(now())
+
+  @@id([user_id, rank])
+  @@map("user_feed_cache")
+}

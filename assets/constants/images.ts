@@ -5,6 +5,8 @@ import hingelogo from "../images/hinge-logo.svg";
 import icon from "../images/icon.png";
 import emailicon2 from "../images/emailicon2.png";
 import splash from "../images/splash.png";
+import lock from "../images/splash.png";
+import phone from "../images/phone.png"
 
 
 const images = {
@@ -15,6 +17,8 @@ const images = {
   icon,
   emailicon2,
   splash,
+  lock,
+  phone
  
 };
 

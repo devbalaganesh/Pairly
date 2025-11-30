@@ -13,9 +13,12 @@
   "dependencies": {
     "@clerk/clerk-expo": "^2.19.6",
     "@expo/vector-icons": "^15.0.3",
+    "@prisma/adapter-pg": "^7.0.1",
+    "@prisma/client": "^7.0.1",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+    "dotenv": "^17.2.3",
     "expo": "~54.0.25",
     "expo-av": "~16.0.7",
     "expo-constants": "~18.0.10",
@@ -33,9 +36,11 @@
     "expo-video": "~3.0.14",
     "expo-web-browser": "~15.0.9",
     "nativewind": "^4.2.1",
+    "pg": "^8.16.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-country-picker-modal": "^2.0.0",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
@@ -44,10 +49,13 @@
     "react-native-worklets": "0.5.1"
   },
   "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
     "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
+    "prisma": "^7.0.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.9.2"
   },
